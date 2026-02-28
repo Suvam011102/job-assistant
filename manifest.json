@@ -1,0 +1,32 @@
+{
+  "name": "Job Selector Pro",
+  "description": "Select, summarize and manage job listings",
+  "version": "1.0",
+  "manifest_version": 3,
+
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "sidePanel"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_title": "Open Job Selector"
+  },
+
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
