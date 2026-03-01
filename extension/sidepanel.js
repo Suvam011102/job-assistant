@@ -9,7 +9,7 @@ const themeToggle = document.getElementById("themeToggle");
 
 function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
-  themeToggle.textContent = theme === "dark" ? "🌙" : "☀️";
+  themeToggle.checked = theme === "dark";
 }
 
 function detectSystemTheme() {
@@ -24,9 +24,8 @@ chrome.storage.local.get(["theme"], (result) => {
   applyTheme(themeToUse);
 });
 
-themeToggle.addEventListener("click", () => {
-  const current = document.documentElement.getAttribute("data-theme");
-  const newTheme = current === "dark" ? "light" : "dark";
+themeToggle.addEventListener("change", () => {
+  const newTheme = themeToggle.checked ? "dark" : "light";
   applyTheme(newTheme);
   chrome.storage.local.set({ theme: newTheme });
 });
@@ -38,124 +37,25 @@ const libraryTab = document.getElementById("libraryTab");
 const analyzerSection = document.getElementById("analyzerSection");
 const librarySection = document.getElementById("librarySection");
 
-analyzerTab.onclick = () => {
+function showAnalyzer() {
   analyzerTab.classList.add("active");
   libraryTab.classList.remove("active");
-  analyzerSection.classList.remove("hidden");
-  librarySection.classList.add("hidden");
-};
+  analyzerSection.style.display = "flex";
+  librarySection.style.display = "none";
+}
 
-libraryTab.onclick = () => {
+function showLibrary() {
   libraryTab.classList.add("active");
   analyzerTab.classList.remove("active");
-  analyzerSection.classList.add("hidden");
-  librarySection.classList.remove("hidden");
+  analyzerSection.style.display = "none";
+  librarySection.style.display = "flex";
   loadLibrary();
-};
-
-/* ================= SAVE SUMMARY ================= */
-
-document.getElementById("saveSummary").addEventListener("click", () => {
-  if (!summaryBox.innerText || summaryBox.innerText.includes("No summary")) {
-    status.innerText = "Nothing to save";
-    return;
-  }
-
-  chrome.storage.local.get(["savedJobs"], (result) => {
-    const saved = result.savedJobs || [];
-
-    saved.push({
-      id: Date.now(),
-      content: summaryBox.innerText
-    });
-
-    chrome.storage.local.set({ savedJobs: saved }, () => {
-      status.innerText = "Saved ✓";
-      // 🔥 Switch to Library tab automatically
-      analyzerTab.classList.remove("active");
-      libraryTab.classList.add("active");
-
-      analyzerSection.classList.add("hidden");
-      librarySection.classList.remove("hidden");
-
-      loadLibrary();
-    });
-  });
-});
-
-/* ================= LOAD LIBRARY ================= */
-
-function loadLibrary() {
-  chrome.storage.local.get(["savedJobs"], (result) => {
-    const saved = result.savedJobs || [];
-    libraryList.innerHTML = "";
-
-    if (saved.length === 0) {
-      libraryList.innerHTML = "<p class='empty'>No saved jobs yet.</p>";
-      return;
-    }
-
-    saved.forEach(job => {
-      const div = document.createElement("div");
-      div.className = "library-item";
-
-      const titleMatch = job.content.match(/Title:\s*(.*)/);
-      const companyMatch = job.content.match(/Company:\s*(.*)/);
-      const locationMatch = job.content.match(/Location:\s*(.*)/);
-
-      const title = titleMatch ? titleMatch[1] : "Saved Job";
-      const company = companyMatch ? companyMatch[1] : "";
-      const location = locationMatch ? locationMatch[1] : "";
-
-      div.innerHTML = `
-        <div class="library-header">
-          <div>
-            <h3>${title}</h3>
-            <p class="meta">${company} ${location ? "• " + location : ""}</p>
-          </div>
-          <button class="delete-btn" data-id="${job.id}">Delete</button>
-        </div>
-
-        <div class="library-body hidden">
-          <pre>${job.content}</pre>
-        </div>
-      `;
-
-      div.querySelector(".library-header").addEventListener("click", (e) => {
-        if (e.target.classList.contains("delete-btn")) return;
-        div.querySelector(".library-body").classList.toggle("hidden");
-      });
-
-      libraryList.appendChild(div);
-    });
-
-    attachDeleteEvents();
-  });
 }
 
-/* ================= DELETE ================= */
+analyzerTab.addEventListener("click", showAnalyzer);
+libraryTab.addEventListener("click", showLibrary);
 
-function attachDeleteEvents() {
-  document.querySelectorAll(".delete-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const id = Number(btn.dataset.id);
-
-      chrome.storage.local.get(["savedJobs"], (result) => {
-        let saved = result.savedJobs || [];
-        saved = saved.filter(job => job.id !== id);
-
-        chrome.storage.local.set({ savedJobs: saved }, loadLibrary);
-      });
-    });
-  });
-}
-
-/* ================= AUTO RESIZE TEXTAREA ================= */
-
-outputBox.addEventListener("input", () => {
-  outputBox.style.height = "auto";
-  outputBox.style.height = outputBox.scrollHeight + "px";
-});
+showAnalyzer();
 
 /* ================= ANALYZER BUTTONS ================= */
 
@@ -167,14 +67,12 @@ const summarizeBtn = document.getElementById("summarize");
 const clearBtn = document.getElementById("clearText");
 
 let selectionActive = false;
-let hasStarted = false; // true once startSelection clicked
+let hasStarted = false;
 
 function updateButtonStates() {
-  // start is disabled only while actively selecting
   startBtn.disabled = selectionActive;
   stopBtn.disabled = !selectionActive;
 
-  // other controls enabled after start has been pressed once
   const active = hasStarted;
   resetBtn.disabled = !active;
   showBtn.disabled = !active;
@@ -182,7 +80,6 @@ function updateButtonStates() {
   clearBtn.disabled = !active;
 }
 
-// initialize buttons
 updateButtonStates();
 
 function sendMessageToActiveTab(message, callback) {
@@ -233,6 +130,7 @@ summarizeBtn.addEventListener("click", async () => {
   }
 
   status.innerText = "Summarizing...";
+
   try {
     const res = await fetch("http://localhost:5000/summarize", {
       method: "POST",
@@ -240,10 +138,9 @@ summarizeBtn.addEventListener("click", async () => {
       body: JSON.stringify({ jobText: text })
     });
 
-    if (!res.ok) throw new Error("Server error");
-
     const data = await res.json();
     const result = data.result || {};
+
     summaryBox.innerText =
       `Title: ${result.title || ""}\n` +
       `Company: ${result.company || ""}\n` +
@@ -255,10 +152,10 @@ summarizeBtn.addEventListener("click", async () => {
       `Experience Required: ${result.experience_required || ""}`;
 
     status.innerText = "Summarized ✓";
+
   } catch (err) {
     console.error(err);
     status.innerText = "Summarize failed";
-    summaryBox.innerText = "Error generating summary.";
   }
 });
 
@@ -267,3 +164,98 @@ clearBtn.addEventListener("click", () => {
   summaryBox.innerText = "No summary generated yet.";
   status.innerText = "Cleared";
 });
+
+/* ================= SAVE SUMMARY ================= */
+
+document.getElementById("saveSummary").addEventListener("click", () => {
+  if (!summaryBox.innerText || summaryBox.innerText.includes("No summary")) {
+    status.innerText = "Nothing to save";
+    return;
+  }
+
+  chrome.storage.local.get(["savedJobs"], (result) => {
+    const saved = result.savedJobs || [];
+
+    saved.push({
+      id: Date.now(),
+      content: summaryBox.innerText
+    });
+
+    chrome.storage.local.set({ savedJobs: saved }, () => {
+      status.innerText = "Saved ✓";
+      showLibrary();
+    });
+  });
+});
+
+/* ================= LOAD LIBRARY ================= */
+
+function loadLibrary() {
+  chrome.storage.local.get(["savedJobs"], (result) => {
+    const saved = result.savedJobs || [];
+    libraryList.innerHTML = "";
+    document.getElementById("jobCount").innerText = saved.length;
+
+    if (saved.length === 0) {
+      libraryList.innerHTML = `
+        <div class="empty">
+          <p>No saved jobs</p>
+        </div>
+      `;
+      return;
+    }
+
+    saved.forEach(job => {
+      const div = document.createElement("div");
+      div.className = "library-card";
+
+      const titleMatch = job.content.match(/Title:\s*(.*)/);
+      const companyMatch = job.content.match(/Company:\s*(.*)/);
+
+      const title = titleMatch ? titleMatch[1] : "Saved Job";
+      const company = companyMatch ? companyMatch[1] : "";
+
+      const preview = job.content.substring(0, 180) + "...";
+
+      div.innerHTML = `
+        <div class="card-header">
+          <div>
+            <h3>${title}</h3>
+            <p class="meta">${company}</p>
+          </div>
+          <button class="delete-btn" data-id="${job.id}">Delete</button>
+        </div>
+
+        <div class="card-preview">
+          ${preview}
+        </div>
+
+        <div class="card-full hidden">
+          <pre>${job.content}</pre>
+        </div>
+      `;
+
+      div.querySelector(".card-preview").addEventListener("click", () => {
+        div.querySelector(".card-full").classList.toggle("hidden");
+      });
+
+      libraryList.appendChild(div);
+    });
+
+    attachDeleteEvents();
+  });
+}
+
+function attachDeleteEvents() {
+  document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = Number(btn.dataset.id);
+
+      chrome.storage.local.get(["savedJobs"], (result) => {
+        let saved = result.savedJobs || [];
+        saved = saved.filter(job => job.id !== id);
+        chrome.storage.local.set({ savedJobs: saved }, loadLibrary);
+      });
+    });
+  });
+}
