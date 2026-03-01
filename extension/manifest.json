@@ -1,6 +1,6 @@
 {
-  "name": "Job Selector Pro",
-  "description": "Select, summarize and manage job listings",
+  "name": "Job Assistant",
+  "description": "Select and summarize job listings",
   "version": "1.0",
   "manifest_version": 3,
 
@@ -11,12 +11,16 @@
     "sidePanel"
   ],
 
+  "host_permissions": [
+    "<all_urls>"
+  ],
+
   "background": {
     "service_worker": "background.js"
   },
 
   "action": {
-    "default_title": "Open Job Selector"
+    "default_title": "Open Job Assistant"
   },
 
   "side_panel": {
