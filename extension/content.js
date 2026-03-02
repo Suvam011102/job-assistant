@@ -1,21 +1,24 @@
+// content.js
+
 let selectionMode = false;
-let selectedElements = [];
+let selectedElements = new Set();
+let originalStyles = new Map();
 
-/* -------- Hover Effect -------- */
-
-function hoverEffect(e) {
-  if (!selectionMode) return;
-  e.target.classList.add("job-hover");
+// Highlight style
+function applyHighlight(el) {
+  originalStyles.set(el, el.style.outline);
+  el.style.outline = "2px solid #3b82f6";
 }
 
-function removeHover(e) {
-  if (!selectionMode) return;
-  e.target.classList.remove("job-hover");
+function removeHighlight(el) {
+  if (originalStyles.has(el)) {
+    el.style.outline = originalStyles.get(el);
+  } else {
+    el.style.outline = "";
+  }
 }
 
-/* -------- Toggle Selection -------- */
-
-function toggleSelect(e) {
+function handleClick(e) {
   if (!selectionMode) return;
 
   e.preventDefault();
@@ -23,87 +26,67 @@ function toggleSelect(e) {
 
   const el = e.target;
 
-  if (selectedElements.includes(el)) {
-    el.classList.remove("job-selected");
-    selectedElements = selectedElements.filter(item => item !== el);
+  if (selectedElements.has(el)) {
+    selectedElements.delete(el);
+    removeHighlight(el);
   } else {
-    el.classList.add("job-selected");
-    selectedElements.push(el);
+    selectedElements.add(el);
+    applyHighlight(el);
   }
 }
 
-/* -------- Start Selection -------- */
-
 function startSelection() {
+  if (selectionMode) return;
   selectionMode = true;
-
-  document.addEventListener("mouseover", hoverEffect, true);
-  document.addEventListener("mouseout", removeHover, true);
-  document.addEventListener("click", toggleSelect, true);
+  document.addEventListener("click", handleClick, true);
 }
-
-/* -------- Stop Selection -------- */
 
 function stopSelection() {
   selectionMode = false;
-
-  document.removeEventListener("mouseover", hoverEffect, true);
-  document.removeEventListener("mouseout", removeHover, true);
-  document.removeEventListener("click", toggleSelect, true);
+  document.removeEventListener("click", handleClick, true);
 }
-
-/* -------- Clear Selection -------- */
 
 function clearSelection() {
-  selectedElements.forEach(el => {
-    el.classList.remove("job-selected");
-  });
-  selectedElements = [];
+  selectedElements.forEach(el => removeHighlight(el));
+  selectedElements.clear();
 }
 
-/* -------- Inject Selection Styles -------- */
+function getSelectedText() {
+  let text = "";
 
-const style = document.createElement("style");
-style.innerHTML = `
-  .job-hover {
-    outline: 2px dashed #60a5fa !important;
-    cursor: crosshair !important;
+  selectedElements.forEach(el => {
+    const cleaned = el.innerText?.trim();
+    if (cleaned) {
+      text += cleaned + "\n\n";
+    }
+  });
+
+  return text.trim();
+}
+
+// Listen for messages from sidepanel
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  switch (message.action) {
+
+    case "startSelection":
+      startSelection();
+      break;
+
+    case "stopSelection":
+      stopSelection();
+      break;
+
+    case "clearSelection":
+      clearSelection();
+      break;
+
+    case "getSelection":
+      sendResponse({ text: getSelectedText() });
+      break;
+
+    default:
+      break;
   }
 
-  .job-selected {
-    outline: 3px solid #22c55e !important;
-    box-shadow: 0 0 8px rgba(34,197,94,0.6) !important;
-  }
-`;
-document.head.appendChild(style);
-
-/* -------- Listen for Messages -------- */
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-
-  if (request.action === "startSelection") {
-    startSelection();
-    sendResponse({ ok: true });
-  }
-
-  if (request.action === "stopSelection") {
-    stopSelection();
-    sendResponse({ ok: true });
-  }
-
-  if (request.action === "clearSelection") {
-    clearSelection();
-    stopSelection();
-    sendResponse({ ok: true });
-  }
-
-  if (request.action === "getSelection") {
-    const text = selectedElements
-      .map(el => el.innerText)
-      .join("\n\n")
-      .trim();
-
-    sendResponse({ text });
-  }
-
+  return true; // required for async sendResponse safety
 });
