@@ -3,22 +3,22 @@
 ========================= */
 
 :root[data-theme="dark"] {
-  --bg: #000000;
-  --panel: #0a0a0a;
-  --panel-2: #111111;
-  --border: #1c1c1c;
-  --text: #f5f5f5;
-  --text-muted: #8a8a8a;
+  --bg: #0b0b0c;
+  --panel: #121214;
+  --panel-2: #1a1a1c;
+  --border: #1f1f22;
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
   --primary: #3b82f6;
   --danger: #ef4444;
   --success: #22c55e;
 }
 
 :root[data-theme="light"] {
-  --bg: #f5f7fa;
+  --bg: #f9fafb;
   --panel: #ffffff;
-  --panel-2: #eef2f7;
-  --border: #d9dee6;
+  --panel-2: #f3f4f6;
+  --border: #e5e7eb;
   --text: #111827;
   --text-muted: #6b7280;
   --primary: #2563eb;
@@ -114,7 +114,7 @@ body {
 }
 
 /* =========================
-   BUTTON GROUPS
+   BUTTONS
 ========================= */
 
 .section {
@@ -131,10 +131,6 @@ body {
 .section.horizontal .btn {
   flex: 1;
 }
-
-/* =========================
-   BUTTONS
-========================= */
 
 .btn {
   display: inline-flex;
@@ -158,10 +154,8 @@ body {
   transform: scale(0.97);
 }
 
-/* Button Variants */
-
 .btn.primary {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, var(--primary), #1d4ed8);
   color: white;
 }
 
@@ -172,16 +166,18 @@ body {
 }
 
 .btn.danger {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, var(--danger), #b91c1c);
   color: white;
 }
 
 .btn.success {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
+  background: linear-gradient(135deg, var(--success), #15803d);
   color: white;
 }
 
-/* Icons */
+/* =========================
+   ICONS
+========================= */
 
 .icon {
   width: 16px;
@@ -197,15 +193,13 @@ body {
 }
 
 /* =========================
-   CARDS (ANALYZER + LIBRARY)
+   CARDS
 ========================= */
 
 .content-section,
 .summary-section,
 .library-card {
-  width: 100%;
-  box-sizing: border-box;
-  background: var(--panel-2);
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 16px;
@@ -215,12 +209,11 @@ body {
 .content-section:hover,
 .summary-section:hover,
 .library-card:hover {
-  border-color: #2a2a2a;
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.08);
 }
 
 /* =========================
-   TEXTAREA
+   TEXTAREA + SUMMARY
 ========================= */
 
 textarea {
@@ -229,7 +222,7 @@ textarea {
   min-height: 150px;
   max-height: 250px;
   overflow-y: auto;
-  background: #0f0f0f;
+  background: var(--panel-2);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 12px;
@@ -238,28 +231,13 @@ textarea {
   font-size: 13px;
 }
 
-/* =========================
-   SUMMARY BOX
-========================= */
-
 .summary-box {
-  background: #0f0f0f;
+  background: var(--panel-2);
   border: 1px solid var(--border);
   padding: 12px;
   border-radius: 10px;
   min-height: 120px;
-  white-space: pre-wrap;
   font-size: 13px;
-}
-
-.loading {
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
 }
 
 /* =========================
@@ -307,29 +285,40 @@ textarea {
   margin-top: 3px;
 }
 
-.card-preview {
+.meta-small {
   font-size: 12px;
-  color: var(--text-muted);
-  cursor: pointer;
+  opacity: 0.7;
 }
 
-.card-full {
-  max-height: 200px;
-  overflow-y: auto;
-  background: #0f0f0f;
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 12px;
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.icon-btn:hover {
+  background: var(--panel-2);
 }
 
 .delete-btn {
-  background: var(--danger);
-  border: none;
-  padding: 4px 10px;
-  border-radius: 6px;
+  color: var(--danger);
+}
+
+.link-btn {
+  color: var(--primary);
+}
+
+.skill-badge {
+  display: inline-block;
+  background: var(--primary);
   color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
   font-size: 11px;
-  cursor: pointer;
+  margin: 3px 4px 3px 0;
 }
 
 /* =========================
@@ -348,7 +337,6 @@ textarea {
   position: relative;
   cursor: pointer;
   display: inline-block;
-  transition: background 0.3s ease;
 }
 
 .slider {
@@ -374,231 +362,15 @@ textarea {
   stroke-width: 2;
   fill: none;
   top: 6px;
-  transition: opacity 0.3s ease;
 }
 
-.sun {
-  left: 8px;
-  opacity: 1;
-}
-
-.moon {
-  right: 8px;
-  opacity: 0;
-}
-
-.theme-switch input:checked + .switch .sun {
-  opacity: 0;
-}
-
-.theme-switch input:checked + .switch .moon {
-  opacity: 1;
-}
+.sun { left: 8px; }
+.moon { right: 8px; }
 
 /* =========================
-   DARK MODE GLOW
+   DRAG EFFECT
 ========================= */
 
-:root[data-theme="dark"] .container {
-  box-shadow: 0 0 30px rgba(59, 130, 246, 0.12);
-}
-
-#saveSummary {
-  margin-top: 10px;
-}
-
-.skill-badge {
-  display: inline-block;
-  background: var(--primary);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  margin: 3px 4px 3px 0;
-}
-
-.skills-container {
-  margin: 8px 0;
-}
-
-.library-card {
-  background: #111;
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 14px;
-  border: 1px solid #222;
-}
-
-.card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.card-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.card-actions button {
-  background: #1f2937;
-  border: none;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.card-actions button:hover {
-  background: #374151;
-}
-
-.card-details {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #222;
-}
-
-.key-points {
-  margin-top: 8px;
-  padding-left: 18px;
-  font-size: 13px;
-}
-
-.hidden {
-  display: none;
-}
-
-.icon-btn {
-  background: #1f2937;
-  border: none;
-  color: #e5e7eb;
-  padding: 6px;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-btn:hover {
-  background: #374151;
-}
-
-.delete-btn {
-  color: #ef4444;
-}
-
-.delete-btn:hover {
-  background: #3f1d1d;
-}
-
-.link-btn {
-  color: #3b82f6;
-}
-
-.expand-btn {
-  color: #9ca3af;
-}
-
-:root {
-  --bg: #f9fafb;
-  --card-bg: #ffffff;
-  --text-color: #111827;
-  --border-color: #e5e7eb;
-  --primary: #2563eb;
-}
-
-[data-theme="dark"] {
-  --bg: #0b0b0c;
-  --card-bg: #121214;
-  --text-color: #f3f4f6;
-  --border-color: #1f1f22;
-  --primary: #3b82f6;
-}
-
-body {
-  background: var(--bg);
-  color: var(--text-color);
-}
-
-textarea {
-  background: var(--card-bg);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-}
-
-.library-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  padding: 12px;
-  margin-bottom: 12px;
-  border-radius: 10px;
-}
-
-.icon-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--text-color);
-}
-
-.delete-btn {
-  color: #ef4444;
-}
-
-.skill-badge {
-  background: var(--primary);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  margin-right: 5px;
-}
-
-.meta-small {
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-.theme-switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-}
-
-.theme-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  inset: 0;
-  background-color: #ccc;
-  border-radius: 34px;
-  transition: 0.3s;
-}
-
-.slider:before {
-  content: "";
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background: white;
-  border-radius: 50%;
-  transition: 0.3s;
-}
-
-input:checked + .slider {
-  background: var(--primary);
-}
-
-input:checked + .slider:before {
-  transform: translateX(20px);
+.drag-ghost {
+  opacity: 0.4;
 }

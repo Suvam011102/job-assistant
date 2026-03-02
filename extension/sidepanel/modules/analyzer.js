@@ -3,7 +3,6 @@ import { getSavedJobs, setSavedJobs } from "./storage.js";
 
 export function initAnalyzer() {
   const outputBox = document.getElementById("outputBox");
-  const status = document.getElementById("status");
   const summaryBox = document.getElementById("summaryBox");
 
   const startBtn = document.getElementById("startSelection");
@@ -18,12 +17,10 @@ export function initAnalyzer() {
 
   startBtn.onclick = () => {
     sendMessageToActiveTab({ action: "startSelection" });
-    status.innerText = "Selection mode on";
   };
 
   stopBtn.onclick = () => {
     sendMessageToActiveTab({ action: "stopSelection" });
-    status.innerText = "Selection mode off";
   };
 
   resetBtn.onclick = () => {
@@ -31,24 +28,19 @@ export function initAnalyzer() {
     outputBox.value = "";
     summaryBox.innerText = "";
     lastStructuredResult = null;
-    status.innerText = "Reset complete";
   };
 
   /* ================= SUMMARIZE ================= */
 
   summarizeBtn.onclick = () => {
-    status.innerText = "Fetching selection...";
-
     sendMessageToActiveTab({ action: "getSelection" }, async (response) => {
       const text = response?.text?.trim();
 
       if (!text) {
-        status.innerText = "No selected content";
         return;
       }
 
       outputBox.value = text;
-      status.innerText = "Summarizing...";
 
       try {
         const res = await fetch("http://localhost:5000/summarize", {
@@ -70,9 +62,8 @@ export function initAnalyzer() {
           `Skills: ${result.skills?.join(", ")}\n` +
           `Experience: ${result.experience_required}`;
 
-        status.innerText = "Summarized successfully";
       } catch (err) {
-        status.innerText = "Summarize failed";
+        console.error("Summarize failed", err);
       }
     });
   };
@@ -81,7 +72,6 @@ export function initAnalyzer() {
 
   saveBtn.onclick = () => {
     if (!lastStructuredResult) {
-      status.innerText = "Nothing to save";
       return;
     }
 
@@ -90,13 +80,11 @@ export function initAnalyzer() {
 
       getSavedJobs((saved) => {
 
-        // 🔥 DUPLICATE CHECK (by job_url)
         const alreadyExists = saved.some(
           job => job.job_url === currentUrl
         );
 
         if (alreadyExists) {
-          status.innerText = "Job already saved";
           return;
         }
 
@@ -108,7 +96,6 @@ export function initAnalyzer() {
         });
 
         setSavedJobs(saved, () => {
-          status.innerText = "Saved successfully";
           window.loadLibrary();
         });
       });

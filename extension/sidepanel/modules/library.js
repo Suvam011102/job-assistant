@@ -6,18 +6,22 @@ export function initLibrary() {
 
 function loadLibrary() {
   const libraryList = document.getElementById("libraryList");
+  const jobCount = document.getElementById("jobCount");
 
   getSavedJobs((saved) => {
     libraryList.innerHTML = "";
+    jobCount.textContent = saved.length;
 
     if (saved.length === 0) {
       libraryList.innerHTML = "<p>No saved jobs</p>";
       return;
     }
 
+    // 🔹 Render Cards
     saved.forEach(job => {
       const div = document.createElement("div");
       div.className = "library-card";
+      div.dataset.id = job.id; // Needed for drag persistence
 
       const skills = job.skills?.map(s =>
         `<span class="skill-badge">${s}</span>`
@@ -52,6 +56,26 @@ function loadLibrary() {
       libraryList.appendChild(div);
     });
 
+    // 🔥 Enable Drag & Reorder (Requires SortableJS CDN in HTML)
+    if (typeof Sortable !== "undefined") {
+      new Sortable(libraryList, {
+        animation: 150,
+        ghostClass: "drag-ghost",
+        onEnd: () => {
+          const reordered = [];
+
+          document.querySelectorAll(".library-card").forEach(card => {
+            const id = Number(card.dataset.id);
+            const job = saved.find(j => j.id === id);
+            if (job) reordered.push(job);
+          });
+
+          setSavedJobs(reordered);
+        }
+      });
+    }
+
+    // 🔹 Delete
     document.querySelectorAll(".delete-btn").forEach(btn => {
       btn.onclick = () => {
         const id = Number(btn.dataset.id);
@@ -60,6 +84,7 @@ function loadLibrary() {
       };
     });
 
+    // 🔹 Open Job Link
     document.querySelectorAll(".link-btn").forEach(btn => {
       btn.onclick = () => {
         const url = btn.dataset.url;
