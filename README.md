@@ -191,6 +191,11 @@ extension
 
 ### analyzer.js
 
+---
+![Analyzer tab allows job analysis](extension/assets/analyzer.png)
+
+---
+
 Handles:
 
 - Selection mode
@@ -202,6 +207,11 @@ Handles:
 ---
 
 ### library.js
+
+---
+![Library tab saves job analysis](extension/assets/library.png)
+
+---
 
 Handles:
 
