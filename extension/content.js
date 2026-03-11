@@ -4,9 +4,12 @@ let selectionMode = false;
 let selectedElements = new Set();
 let originalStyles = new Map();
 
-// Highlight style
+/* ================= HIGHLIGHT ================= */
+
 function applyHighlight(el) {
-  originalStyles.set(el, el.style.outline);
+  if (!originalStyles.has(el)) {
+    originalStyles.set(el, el.style.outline);
+  }
   el.style.outline = "2px solid #3b82f6";
 }
 
@@ -18,54 +21,106 @@ function removeHighlight(el) {
   }
 }
 
+/* ================= CLICK HANDLER ================= */
+
 function handleClick(e) {
+
   if (!selectionMode) return;
+
+  const el = e.target;
+
+  // Ignore root elements
+  if (el === document.body || el === document.documentElement) return;
 
   e.preventDefault();
   e.stopPropagation();
 
-  const el = e.target;
-
   if (selectedElements.has(el)) {
+
     selectedElements.delete(el);
     removeHighlight(el);
+
   } else {
+
     selectedElements.add(el);
     applyHighlight(el);
+
   }
 }
 
+/* ================= START SELECTION ================= */
+
 function startSelection() {
+
   if (selectionMode) return;
+
   selectionMode = true;
-  document.addEventListener("click", handleClick, true);
+
+  document.body.style.cursor = "crosshair";
+
+  document.addEventListener(
+    "click",
+    handleClick,
+    true
+  );
+
 }
+
+/* ================= STOP SELECTION ================= */
 
 function stopSelection() {
+
+  if (!selectionMode) return;
+
   selectionMode = false;
-  document.removeEventListener("click", handleClick, true);
+
+  document.body.style.cursor = "default";
+
+  document.removeEventListener(
+    "click",
+    handleClick,
+    true
+  );
+
 }
+
+/* ================= CLEAR SELECTION ================= */
 
 function clearSelection() {
-  selectedElements.forEach(el => removeHighlight(el));
+
+  selectedElements.forEach((el) => {
+    removeHighlight(el);
+  });
+
   selectedElements.clear();
+  originalStyles.clear();
+
 }
 
+/* ================= GET SELECTED TEXT ================= */
+
 function getSelectedText() {
+
   let text = "";
 
-  selectedElements.forEach(el => {
+  selectedElements.forEach((el) => {
+
     const cleaned = el.innerText?.trim();
+
     if (cleaned) {
       text += cleaned + "\n\n";
     }
+
   });
 
   return text.trim();
+
 }
 
-// Listen for messages from sidepanel
+/* ================= MESSAGE LISTENER ================= */
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
   switch (message.action) {
 
     case "startSelection":
@@ -88,5 +143,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
   }
 
-  return true; // required for async sendResponse safety
+  return true;
+
 });

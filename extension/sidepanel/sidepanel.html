@@ -1,148 +1,143 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+  <head>
+    <title>Job Assistant</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
 
-<head>
-  <title>Job Assistant</title>
-  <link rel="stylesheet" href="sidepanel.css">
-</head>
-
-<body>
-
-  <div class="container">
-
-    <!-- Header -->
-    <div class="header">
-      <h1>Job Assistant</h1>
-      <div class="header-right">
-        <div class="theme-switch">
-          <input type="checkbox" id="themeToggle">
-          <label for="themeToggle" class="switch">
-            <span class="slider"></span>
-            <svg class="sun" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="4" />
-            </svg>
-            <svg class="moon" viewBox="0 0 24 24">
-              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-            </svg>
-          </label>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>Job Assistant</h1>
+        <div class="header-right">
+          <div class="theme-switch">
+            <input type="checkbox" id="themeToggle" />
+            <label for="themeToggle" class="switch">
+              <span class="slider"></span>
+              <svg class="sun" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="4" />
+              </svg>
+              <svg class="moon" viewBox="0 0 24 24">
+                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+              </svg>
+            </label>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Tabs -->
-    <div class="tab-bar">
-      <div id="analyzerTab" class="tab active">Analyzer</div>
-      <div id="libraryTab" class="tab">Library</div>
-    </div>
-
-    <!-- ================= ANALYZER ================= -->
-    <div id="analyzerSection">
-
-      <div class="section">
-        <button id="startSelection" class="btn primary">
-          <span class="icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </span>
-          Start Selection
-        </button>
-
-        <button id="stopSelection" class="btn secondary">
-          <span class="icon">
-            <svg viewBox="0 0 24 24">
-              <rect x="6" y="6" width="12" height="12" />
-            </svg>
-          </span>
-          Stop
-        </button>
-
-        <button id="resetSelection" class="btn danger">
-          <span class="icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" />
-            </svg>
-          </span>
-          Reset
-        </button>
+      <!-- Tabs -->
+      <div class="tab-bar">
+        <div id="analyzerTab" class="tab active">Analyzer</div>
+        <div id="libraryTab" class="tab">Library</div>
       </div>
 
-      <div class="section horizontal">
-        <button id="showOutput" class="btn secondary">
-          <span class="icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            </svg>
-          </span>
-          Show
-        </button>
+      <!-- ================= ANALYZER ================= -->
+      <div id="analyzerSection">
+        <div class="section">
+          <button id="startSelection" class="btn primary">
+            <span class="icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </span>
+            Start Selection
+          </button>
 
-        <button id="summarize" class="btn primary">
-          <span class="icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M4 4h16v4H4zM4 10h16v4H4zM4 16h10v4H4z" />
-            </svg>
-          </span>
-          Summarize
-        </button>
+          <button id="stopSelection" class="btn secondary">
+            <span class="icon">
+              <svg viewBox="0 0 24 24">
+                <rect x="6" y="6" width="12" height="12" />
+              </svg>
+            </span>
+            Stop
+          </button>
 
-        <button id="clearText" class="btn secondary">
-          <span class="icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </span>
-          Clear
-        </button>
-      </div>
-
-      <div class="content-section">
-        <h2>Selected Job Content</h2>
-        <textarea id="outputBox" placeholder="Selected job content will appear here..."></textarea>
-      </div>
-
-      <div class="summary-section">
-        <h2>AI Summary</h2>
-        <div id="summaryBox" class="summary-box">
-          No summary generated yet.
+          <button id="resetSelection" class="btn danger">
+            <span class="icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" />
+              </svg>
+            </span>
+            Reset
+          </button>
         </div>
 
-        <button id="saveSummary" class="btn success">
-          <span class="icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M19 21H5V3h11l3 3z" />
-            </svg>
-          </span>
-          Save to Library
-        </button>
-      </div>
+        <div class="section horizontal">
+          <button id="showOutput" class="btn secondary">
+            <span class="icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              </svg>
+            </span>
+            Show
+          </button>
 
-    </div>
+          <button id="summarize" class="btn primary">
+            <span class="icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 4h16v4H4zM4 10h16v4H4zM4 16h10v4H4z" />
+              </svg>
+            </span>
+            Summarize
+          </button>
 
-    <!-- ================= LIBRARY ================= -->
-    <div id="librarySection" style="display:none;">
-
-      <div class="library-header-main">
-        <div>
-          <h2>Your Saved Jobs</h2>
-          <p class="library-sub">All your summarized roles in one place</p>
+          <button id="clearText" class="btn secondary">
+            <span class="icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </span>
+            Clear
+          </button>
         </div>
-        <span id="jobCount" class="job-count">0</span>
+
+        <div class="content-section">
+          <h2>Selected Job Content</h2>
+          <textarea
+            id="outputBox"
+            placeholder="Selected job content will appear here..."
+          ></textarea>
+        </div>
+
+        <div class="summary-section">
+          <h2>AI Summary</h2>
+          <div id="summaryBox" class="summary-box">
+            No summary generated yet.
+          </div>
+
+          <button id="saveSummary" class="btn success">
+            <span class="icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M19 21H5V3h11l3 3z" />
+              </svg>
+            </span>
+            Save to Library
+          </button>
+        </div>
+
+        <button id="getAdvice" class="btn secondary">Get Job Advice</button>
       </div>
 
-      <div id="libraryList" class="library-grid"></div>
+      <!-- ================= LIBRARY ================= -->
+      <div id="librarySection" style="display: none">
+        <div class="library-header-main">
+          <div>
+            <h2>Your Saved Jobs</h2>
+            <p class="library-sub">All your summarized roles in one place</p>
+          </div>
+          <span id="jobCount" class="job-count">0</span>
+        </div>
 
+        <div id="libraryList" class="library-grid"></div>
+      </div>
     </div>
 
-  </div>
+    <!-- 🔥 Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
 
-  <!-- 🔥 Toast Notification -->
-  <div id="toast" class="toast hidden"></div>
-
-  <!-- 🔥 Local Sortable -->
-  <script src="libs/Sortable.min.js"></script>
-  <script type="module" src="sidepanel.js"></script>
-
-</body>
-
+    <!-- 🔥 Local Sortable -->
+    <script src="libs/Sortable.min.js"></script>
+    <script type="module" src="sidepanel.js"></script>
+  </body>
 </html>
