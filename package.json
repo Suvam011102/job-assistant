@@ -1,0 +1,8 @@
+{
+  "name": "job-assistant-workspace",
+  "private": true,
+  "scripts": {
+    "preview": "node extension/preview/server.js",
+    "test:ui": "node extension/tests/ui-smoke.test.mjs"
+  }
+}

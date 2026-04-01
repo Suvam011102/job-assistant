@@ -1,0 +1,205 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Job Assistant Preview</title>
+    <link rel="stylesheet" href="../sidepanel/sidepanel.css" />
+    <link rel="stylesheet" href="./preview.css" />
+  </head>
+  <body class="preview-body">
+    <script type="module" src="./mockChrome.js"></script>
+
+    <main class="preview-shell">
+      <aside class="preview-tools">
+        <h2>Preview Controls</h2>
+        <p>Use this page to iterate on the sidepanel UI in a normal browser tab. The extension APIs and backend responses are mocked by default.</p>
+
+        <div class="preview-field">
+          <label for="selectedTextInput">Mock selected job text</label>
+          <textarea id="selectedTextInput"></textarea>
+        </div>
+
+        <div class="preview-field">
+          <label for="jobUrlInput">Mock current tab URL</label>
+          <input id="jobUrlInput" class="btn secondary" type="text" />
+        </div>
+
+        <div class="preview-field">
+          <label class="preview-chip">
+            <input id="mockBackend" type="checkbox" checked />
+            Mock backend responses
+          </label>
+        </div>
+
+        <div class="preview-actions">
+          <button id="resetFixtures" class="btn secondary" type="button">Reset Fixtures</button>
+        </div>
+
+        <div id="selectionStatus" class="preview-status"></div>
+
+        <div class="preview-flow">
+          <h3>Mock Workflow</h3>
+          <p>Click <strong>Start Selection</strong>, then click blocks in the mock job page to build the selected text. Click <strong>Show</strong> to pull that selection into the sidepanel.</p>
+        </div>
+      </aside>
+
+      <section class="preview-main">
+        <article class="preview-job-page">
+          <div class="preview-job-header">
+            <span class="preview-badge">Mock Job Page</span>
+            <h2>Selection Sandbox</h2>
+            <p>Use this panel to simulate selecting chunks from a live job post.</p>
+          </div>
+          <div id="mockJobPage" class="preview-job-content"></div>
+        </article>
+
+        <section class="container preview-panel">
+        <div class="header">
+          <div>
+            <span class="header-kicker">Career Workspace</span>
+            <h1>Job Assistant</h1>
+            <p class="header-copy">
+              Capture role details, generate a quick readout, and stash strong leads without leaving the page.
+            </p>
+          </div>
+          <div class="header-right">
+            <div class="theme-switch">
+              <input type="checkbox" id="themeToggle" />
+              <label for="themeToggle" class="switch">
+                <span class="slider"></span>
+                <svg class="sun" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="4" />
+                </svg>
+                <svg class="moon" viewBox="0 0 24 24">
+                  <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-bar">
+          <div id="analyzerTab" class="tab active">Analyzer</div>
+          <div id="briefTab" class="tab">Brief</div>
+          <div id="libraryTab" class="tab">Library</div>
+        </div>
+
+        <div id="analyzerSection">
+          <div class="hero-card">
+            <div class="hero-copy">
+              <span class="section-label">Capture</span>
+              <h2>Pull the job post into your workspace.</h2>
+              <p>Select content on the page, preview it here, then turn it into a clean brief when you are ready.</p>
+            </div>
+
+            <div class="section compact-grid">
+              <button id="startSelection" class="btn primary">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </span>
+                Start Selection
+              </button>
+
+              <button id="stopSelection" class="btn secondary">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24">
+                    <rect x="6" y="6" width="12" height="12" />
+                  </svg>
+                </span>
+                Stop
+              </button>
+
+              <button id="showOutput" class="btn secondary">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  </svg>
+                </span>
+                Show
+              </button>
+
+              <button id="summarize" class="btn primary">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M4 4h16v4H4zM4 10h16v4H4zM4 16h10v4H4z" />
+                  </svg>
+                </span>
+                Summarize
+              </button>
+
+              <button id="clearText" class="btn secondary">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </span>
+                Clear
+              </button>
+
+              <button id="resetSelection" class="btn danger">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" />
+                  </svg>
+                </span>
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div class="content-section editor-card">
+            <div class="section-heading">
+              <span class="section-label">Source</span>
+              <h2>Selected Job Content</h2>
+            </div>
+            <textarea id="outputBox" placeholder="Selected job content will appear here..."></textarea>
+          </div>
+        </div>
+
+        <div id="briefSection" style="display: none">
+          <div class="summary-section">
+            <div class="section-heading">
+              <span class="section-label">Brief</span>
+              <h2>Role Snapshot</h2>
+            </div>
+            <div id="summaryBox" class="summary-box">No summary generated yet.</div>
+
+            <div class="section horizontal summary-actions">
+              <button id="saveSummary" class="btn success">
+                <span class="icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M19 21H5V3h11l3 3z" />
+                  </svg>
+                </span>
+                Save to Library
+              </button>
+
+              <button id="getAdvice" class="btn secondary">Get Job Advice</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="librarySection" style="display: none">
+          <div class="library-header-main">
+            <div>
+              <h2>Your Saved Jobs</h2>
+              <p class="library-sub">All your summarized roles in one place</p>
+            </div>
+            <span id="jobCount" class="job-count">0</span>
+          </div>
+
+          <div id="libraryList" class="library-grid"></div>
+        </div>
+
+        <div id="toast" class="toast hidden"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="../libs/Sortable.min.js"></script>
+    <script type="module" src="./preview.js"></script>
+  </body>
+</html>

@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "preview": "node ../extension/preview/server.js",
+    "test": "node ../extension/tests/ui-smoke.test.mjs"
   },
   "keywords": [],
   "author": "",

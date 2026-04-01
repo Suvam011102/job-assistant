@@ -113,7 +113,14 @@ function getSelectedText() {
 
   });
 
-  return text.trim();
+  const clickedSelection = text.trim();
+  if (clickedSelection) {
+    return clickedSelection;
+  }
+
+  // Fallback to native browser text selection so standard highlight-drag works too.
+  const nativeSelection = window.getSelection?.().toString().trim();
+  return nativeSelection || "";
 
 }
 
