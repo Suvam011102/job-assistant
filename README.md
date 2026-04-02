@@ -1,12 +1,21 @@
-# Job Assistant – AI Powered Job Listing Analyzer
+# Role Brief (Job Assistant) – AI Powered Job Listing Analyzer
 
-Job Assistant is a Chrome extension that helps users analyze, summarize, and organize job listings using AI.
+Role Brief is a Chrome extension that helps users analyze, summarize, and organize job listings using AI.
 
 Instead of manually reading long job descriptions, users can select job content directly from a webpage, generate an AI structured summary, and save the job into a personal library for later review.
 
 The project uses a Groq LLM backend, a Node.js API, and a Chrome Extension side panel UI to provide a fast workflow for job seekers.
 
 ---
+
+### Analyzer
+<img width="1920" height="1078" alt="Analyzer" src="https://github.com/user-attachments/assets/94d2487d-40b7-4fa7-a0ea-f4724ee8dbc0" />
+
+### Brief
+<img width="1920" height="1078" alt="Brief" src="https://github.com/user-attachments/assets/6ac0c604-9bd0-4047-bb51-8917f6407cfb" />
+
+### Library
+<img width="1920" height="1078" alt="Library" src="https://github.com/user-attachments/assets/59be1e4a-3293-48f8-85a3-8b51b6e3a3cf" />
 
 ## Features
 
@@ -390,17 +399,6 @@ Save to Library
 - Redis caching layer
 - Streaming AI responses
 - Batch job analysis
-
----
-
-### Extension Improvements
-
-- Search saved jobs
-- Tagging system
-- Export saved jobs
-- Notion integration
-- Resume matching
-- Auto detection of job pages
 
 ---
 
