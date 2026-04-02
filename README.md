@@ -197,12 +197,6 @@ extension
 ---
 
 ## Key Modules
-
-### analyzer.js
-
----
-![Analyzer tab allows job analysis](extension/assets/analyzer.png)
-
 ---
 
 Handles:
@@ -212,13 +206,6 @@ Handles:
 - Calling the backend API
 - Rendering AI summaries
 - Saving jobs
-
----
-
-### library.js
-
----
-![Library tab saves job analysis](extension/assets/library.png)
 
 ---
 
