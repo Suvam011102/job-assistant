@@ -302,7 +302,9 @@ export function initAnalyzer() {
     });
 
     if (nextBusy) {
-      setSummary(label || "Working...");
+      if (!summaryBox.classList.contains("brief-layout")) {
+        setSummary(label || "Working...");
+      }
       return;
     }
 
@@ -452,7 +454,8 @@ export function initAnalyzer() {
       }
 
       try {
-        setBusyState(true, `${summaryBox.textContent}\n\nGenerating interview advice...`);
+        setBusyState(true);
+        showToast("Generating job advice...", "info");
 
         const data = await postJSON("/job-advice", {
           jobText: text,
@@ -465,7 +468,7 @@ export function initAnalyzer() {
         showToast("Advice generated.", "success");
       } catch (error) {
         console.error("Advice generation failed", error);
-        appendSummary(`Advice generation failed.\n${error.message}`);
+        renderBrief(lastStructuredResult, lastAdviceResult);
         showToast("Advice generation failed.", "error");
       } finally {
         setBusyState(false);

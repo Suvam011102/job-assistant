@@ -1,6 +1,6 @@
 {
-  "name": "Job Assistant",
-  "description": "Select and summarize job listings",
+  "name": "Role Brief",
+  "description": "Capture, summarize, and organize job listings",
   "version": "1.0",
   "manifest_version": 3,
 
@@ -20,7 +20,7 @@
   },
 
   "action": {
-    "default_title": "Open Job Assistant"
+    "default_title": "Open Role Brief"
   },
 
   "side_panel": {

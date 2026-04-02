@@ -5,9 +5,25 @@ const { extractJobData, generateJobAdvice } = require("./llm");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+let requestCounter = 0;
+
+function nextRequestId(prefix) {
+  requestCounter += 1;
+  return `${prefix}-${String(requestCounter).padStart(4, "0")}`;
+}
 
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+app.use((req, res, next) => {
+  const startedAt = Date.now();
+  console.log(`[http] ${req.method} ${req.path} incoming`);
+
+  res.on("finish", () => {
+    console.log(`[http] ${req.method} ${req.path} -> ${res.statusCode} (${Date.now() - startedAt}ms)`);
+  });
+
+  next();
+});
 
 app.get("/", (req, res) => {
   res.json({ message: "Backend running successfully" });
@@ -15,16 +31,21 @@ app.get("/", (req, res) => {
 
 app.post("/summarize", async (req, res) => {
   const { jobText } = req.body || {};
+  const requestId = nextRequestId("summarize");
+
+  console.log(`[${requestId}] received summarize request (${jobText?.length || 0} chars)`);
 
   if (!jobText || !jobText.trim()) {
+    console.warn(`[${requestId}] rejected: no job text provided`);
     return res.status(400).json({ error: "No job text provided" });
   }
 
   try {
-    const result = await extractJobData(jobText);
+    const result = await extractJobData(jobText, { requestId });
+    console.log(`[${requestId}] summarize success: ${result.title || "untitled role"}`);
     return res.json({ result });
   } catch (error) {
-    console.error("Groq summarize error:", error.response?.data || error.message);
+    console.error(`[${requestId}] summarize failed:`, error.response?.data || error.message);
 
     const statusCode = error.message === "GROQ_API_KEY is not configured" ? 500 : 502;
     return res.status(statusCode).json({
@@ -35,16 +56,21 @@ app.post("/summarize", async (req, res) => {
 
 app.post("/job-advice", async (req, res) => {
   const { jobText, jobSummary } = req.body || {};
+  const requestId = nextRequestId("advice");
+
+  console.log(`[${requestId}] received advice request (${jobText?.length || 0} chars)`);
 
   if (!jobText || !jobText.trim()) {
+    console.warn(`[${requestId}] rejected: no job text provided`);
     return res.status(400).json({ error: "Job text required" });
   }
 
   try {
-    const advice = await generateJobAdvice(jobText, jobSummary);
+    const advice = await generateJobAdvice(jobText, jobSummary, { requestId });
+    console.log(`[${requestId}] advice success`);
     return res.json({ advice });
   } catch (error) {
-    console.error("Job advice error:", error.response?.data || error.message);
+    console.error(`[${requestId}] advice failed:`, error.response?.data || error.message);
 
     const statusCode = error.message === "GROQ_API_KEY is not configured" ? 500 : 502;
     return res.status(statusCode).json({

@@ -59,7 +59,7 @@ function createSkillBadges(skills = []) {
   return container;
 }
 
-function createLibraryCard(job) {
+function createLibraryCard(job, { onDelete, onOpen }) {
   const card = document.createElement("div");
   card.className = "library-card";
   card.dataset.id = String(job.id);
@@ -67,7 +67,19 @@ function createLibraryCard(job) {
   const header = document.createElement("div");
   header.className = "card-header";
 
+  const headerMain = document.createElement("div");
+  headerMain.className = "card-header-main";
+
+  const dragHandle = document.createElement("div");
+  dragHandle.className = "drag-handle";
+  dragHandle.innerHTML = `
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+      <path fill="currentColor" d="M9 6a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 4.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM9 15a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm6-9a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 4.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 4.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z"/>
+    </svg>
+  `;
+
   const info = document.createElement("div");
+  info.className = "card-info";
   info.appendChild(createTextElement("h3", "", job.title || "Untitled role"));
   info.appendChild(
     createTextElement(
@@ -80,7 +92,7 @@ function createLibraryCard(job) {
     createTextElement(
       "p",
       "meta-small",
-      `${job.job_type || "Unknown type"} • ${job.experience_required || "Experience not listed"}`
+      `${job.job_type || "Unknown type"}`
     )
   );
   info.appendChild(
@@ -90,41 +102,40 @@ function createLibraryCard(job) {
   const actions = document.createElement("div");
   actions.className = "card-actions";
 
-  actions.appendChild(
-    createIconButton(
-      "toggle-btn",
-      "expanded",
-      "false",
-      '<path fill="currentColor" d="M7 10l5 5 5-5z"/>'
-    )
+  const toggleButton = createIconButton(
+    "toggle-btn",
+    "expanded",
+    "false",
+    '<path fill="currentColor" d="M7 10l5 5 5-5z"/>'
   );
+  actions.appendChild(toggleButton);
 
-  actions.appendChild(
-    createIconButton(
-      "link-btn",
-      "url",
-      job.job_url || "",
-      '<path fill="currentColor" d="M3.9 12a5 5 0 0 1 5-5h3v2h-3a3 3 0 0 0 0 6h3v2h-3a5 5 0 0 1-5-5z"/><path fill="currentColor" d="M12.1 7h3a5 5 0 0 1 0 10h-3v-2h3a3 3 0 1 0 0-6h-3z"/>'
-    )
+  const linkButton = createIconButton(
+    "link-btn",
+    "url",
+    job.job_url || "",
+    '<path fill="currentColor" d="M3.9 12a5 5 0 0 1 5-5h3v2h-3a3 3 0 0 0 0 6h3v2h-3a5 5 0 0 1-5-5z"/><path fill="currentColor" d="M12.1 7h3a5 5 0 0 1 0 10h-3v-2h3a3 3 0 1 0 0-6h-3z"/>'
   );
+  actions.appendChild(linkButton);
 
-  actions.appendChild(
-    createIconButton(
-      "delete-btn",
-      "id",
-      String(job.id),
-      '<path fill="currentColor" d="M6 7h12v2H6zm2 3h8l-1 9H9l-1-9z"/>'
-    )
+  const deleteButton = createIconButton(
+    "delete-btn",
+    "id",
+    String(job.id),
+    '<path fill="currentColor" d="M6 7h12v2H6zm2 3h8l-1 9H9l-1-9z"/>'
   );
+  actions.appendChild(deleteButton);
 
-  header.appendChild(info);
+  headerMain.appendChild(dragHandle);
+  headerMain.appendChild(info);
+  header.appendChild(headerMain);
   header.appendChild(actions);
   card.appendChild(header);
   card.appendChild(createSkillBadges(job.skills));
 
   const details = document.createElement("div");
   details.className = "library-details";
-  details.hidden = true;
+  details.style.display = "none";
 
   details.appendChild(
     createTextElement("p", "library-summary", job.summary || "No summary available.")
@@ -146,55 +157,50 @@ function createLibraryCard(job) {
     createTextElement(
       "p",
       "library-detail-item",
-      `Tech Stack: ${job.tech_stack?.join(", ") || "Not listed"}`
-    )
-  );
-  detailGrid.appendChild(
-    createTextElement(
-      "p",
-      "library-detail-item",
-      `Job URL: ${job.job_url || "Not available"}`
+      `Experience: ${job.experience_required || "Not listed"}`
     )
   );
 
   details.appendChild(detailGrid);
   card.appendChild(details);
 
+  toggleButton.addEventListener("mousedown", (event) => {
+    event.stopPropagation();
+  });
+  toggleButton.onclick = (event) => {
+    event.stopPropagation();
+    const nextExpanded = toggleButton.dataset.expanded !== "true";
+    toggleButton.dataset.expanded = String(nextExpanded);
+    details.style.display = nextExpanded ? "grid" : "none";
+    toggleButton.classList.toggle("is-open", nextExpanded);
+    toggleButton.setAttribute("aria-expanded", String(nextExpanded));
+  };
+
+  linkButton.onclick = (event) => {
+    event.stopPropagation();
+    onOpen(job.job_url || "");
+  };
+
+  deleteButton.onclick = (event) => {
+    event.stopPropagation();
+    onDelete(job.id);
+  };
+
   return card;
 }
 
 function attachLibraryEventHandlers(saved) {
-  document.querySelectorAll(".toggle-btn").forEach((button) => {
-    button.onclick = () => {
-      const card = button.closest(".library-card");
-      const details = card?.querySelector(".library-details");
-      if (!details) {
-        return;
-      }
-
-      const nextExpanded = button.dataset.expanded !== "true";
-      button.dataset.expanded = String(nextExpanded);
-      details.hidden = !nextExpanded;
-      button.classList.toggle("is-open", nextExpanded);
-    };
-  });
-
-  document.querySelectorAll(".delete-btn").forEach((button) => {
-    button.onclick = () => {
-      const id = Number(button.dataset.id);
+  return {
+    onDelete(id) {
       const updated = saved.filter((job) => job.id !== id);
       setSavedJobs(updated, loadLibrary);
-    };
-  });
-
-  document.querySelectorAll(".link-btn").forEach((button) => {
-    button.onclick = () => {
-      const url = button.dataset.url;
+    },
+    onOpen(url) {
       if (url) {
         chrome.tabs.create({ url });
       }
-    };
-  });
+    },
+  };
 }
 
 function enableSorting(libraryList, saved) {
@@ -209,6 +215,9 @@ function enableSorting(libraryList, saved) {
   libraryList._sortableInstance = new Sortable(libraryList, {
     animation: 150,
     ghostClass: "drag-ghost",
+    handle: ".drag-handle",
+    filter: ".icon-btn, .library-details, .library-summary, .library-detail-item, .skills-container, .skill-badge",
+    preventOnFilter: false,
     onEnd: () => {
       const reordered = [];
 
@@ -238,11 +247,12 @@ function loadLibrary() {
       return;
     }
 
+    const handlers = attachLibraryEventHandlers(saved);
+
     saved.forEach((job) => {
-      libraryList.appendChild(createLibraryCard(job));
+      libraryList.appendChild(createLibraryCard(job, handlers));
     });
 
     enableSorting(libraryList, saved);
-    attachLibraryEventHandlers(saved);
   });
 }

@@ -8,6 +8,11 @@ const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
 const CACHE_TTL_SECONDS = 600;
 const MAX_JOB_TEXT_LENGTH = 12000;
 
+function log(requestId, message) {
+  const prefix = requestId ? `[${requestId}]` : "[llm]";
+  console.log(`${prefix} ${message}`);
+}
+
 const JobSchema = z.object({
   title: z.string(),
   company: z.string(),
@@ -51,8 +56,9 @@ function createCacheKey(prefix, value) {
   return `${prefix}:${digest}`;
 }
 
-async function callGroq(messages, temperature = 0) {
+async function callGroq(messages, temperature = 0, requestId) {
   requireGroqApiKey();
+  log(requestId, `calling Groq model=${GROQ_MODEL} temperature=${temperature}`);
 
   const response = await axios.post(
     GROQ_URL,
@@ -70,6 +76,7 @@ async function callGroq(messages, temperature = 0) {
     }
   );
 
+  log(requestId, `Groq responded with status ${response.status}`);
   return response.data.choices?.[0]?.message?.content || "";
 }
 
@@ -86,33 +93,47 @@ function safeParseJSON(content) {
   }
 }
 
-async function requestStructuredData({ cacheKey, schema, messages, temperature = 0, retries = 1 }) {
+async function requestStructuredData({
+  cacheKey,
+  schema,
+  messages,
+  temperature = 0,
+  retries = 1,
+  requestId,
+}) {
   if (cacheKey) {
     const cached = await getCachedValue(cacheKey);
     if (cached) {
+      log(requestId, `cache hit for ${cacheKey}`);
       return schema.parse(JSON.parse(cached));
     }
+
+    log(requestId, `cache miss for ${cacheKey}`);
   }
 
   try {
-    const raw = await callGroq(messages, temperature);
+    const raw = await callGroq(messages, temperature, requestId);
     const parsed = safeParseJSON(raw);
+    log(requestId, "Groq response parsed as JSON");
     const validated = schema.parse(parsed);
+    log(requestId, "schema validation passed");
 
     if (cacheKey) {
       await setCachedValue(cacheKey, CACHE_TTL_SECONDS, JSON.stringify(validated));
+      log(requestId, `cache store attempted for ${cacheKey}`);
     }
 
     return validated;
   } catch (error) {
     if (retries > 0) {
-      console.warn("Retrying Groq request...");
+      console.warn(`[${requestId || "llm"}] retrying Groq request...`);
       return requestStructuredData({
         cacheKey,
         schema,
         messages,
         temperature,
         retries: retries - 1,
+        requestId,
       });
     }
 
@@ -120,13 +141,15 @@ async function requestStructuredData({ cacheKey, schema, messages, temperature =
   }
 }
 
-async function extractJobData(jobText) {
+async function extractJobData(jobText, { requestId } = {}) {
   const cleanedText = cleanJobText(jobText);
   const cacheKey = createCacheKey("job", cleanedText);
+  log(requestId, `extracting job data (${cleanedText.length} cleaned chars)`);
 
   return requestStructuredData({
     cacheKey,
     schema: JobSchema,
+    requestId,
     messages: [
       {
         role: "system",
@@ -161,22 +184,46 @@ Schema:
   });
 }
 
-async function generateJobAdvice(jobText, jobSummary = {}) {
+async function generateJobAdvice(jobText, jobSummary = {}, { requestId } = {}) {
   const cleanedText = cleanJobText(jobText);
   const summaryString = JSON.stringify(jobSummary, null, 2);
   const cacheKey = createCacheKey("advice", `${cleanedText}:${summaryString}`);
+  log(requestId, `generating advice (${cleanedText.length} cleaned chars)`);
 
   return requestStructuredData({
     cacheKey,
     schema: AdviceSchema,
     temperature: 0.4,
+    requestId,
     messages: [
       {
         role: "system",
         content: `
 You are a senior tech recruiter and career advisor.
 
-Analyze the job posting and provide preparation advice for a candidate.
+Analyze the job posting and provide high-signal preparation advice for a candidate.
+
+Your advice must be specific to THIS job posting.
+Do not give generic interview tips unless they clearly connect to the role.
+Anchor your advice in the responsibilities, qualifications, tech stack, domain, seniority, and company context from the posting.
+
+Quality bar:
+- Be concrete and role-specific.
+- Prefer 3-6 high-value items per list.
+- Mention the actual technologies, team scope, systems, leadership expectations, and domain context when relevant.
+- Focus on what would materially improve interview performance or resume alignment.
+- Avoid filler like "be a good communicator" unless you tie it to a real responsibility in the posting.
+- Infer likely interview focus areas from the job, but do not invent unsupported facts.
+- When the company or domain matters, explain why it matters for this role.
+
+Interpretation rules:
+- For company_insight, summarize what the role appears to optimize for and what the company/team likely values in this job.
+- For key_strengths_to_highlight, identify candidate qualities or experiences that best match the posting.
+- For important_topics_to_prepare, identify technical, product, system, or leadership areas the candidate should study.
+- For likely_interview_focus, predict what interviewers are most likely to probe deeply.
+- For recommended_preparation_steps, give practical actions the candidate can do before interviewing.
+- For resume_focus, identify what the candidate should emphasize or move higher on the resume.
+- For questions_to_ask_interviewer, generate thoughtful, role-specific questions that show good judgment.
 
 Return ONLY valid JSON in this format:
 {
@@ -198,6 +245,10 @@ ${summaryString}
 
 JOB DESCRIPTION:
 ${cleanedText}
+
+Create advice for a candidate applying to this role.
+Assume the candidate wants actionable, specific guidance for interview preparation and resume positioning.
+Return only JSON.
 `,
       },
     ],
